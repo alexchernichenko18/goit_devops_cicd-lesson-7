@@ -4,20 +4,20 @@ resource "aws_iam_role" "nodes" {
   name = "${var.cluster_name}-eks-nodes"
 
   # Політика, що дозволяє EC2 асумувати роль
-  assume_role_policy = <<POLICY
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "ec2.amazonaws.com"
-      }
-    }
-  ]
+  assume_role_policy = data.aws_iam_policy_document.nodes_assume_role.json
 }
-POLICY
+
+# Data блок для assume role політики EC2 нод
+data "aws_iam_policy_document" "nodes_assume_role" {
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+  }
 }
 
 # Прив'язка політики для EKS Worker Nodes
